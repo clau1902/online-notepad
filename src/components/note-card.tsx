@@ -19,11 +19,11 @@ interface NoteCardProps {
 export function NoteCard({ note, onClick }: NoteCardProps) {
   return (
     <Card
-      className="cursor-pointer border-[#E8F0E8] bg-white/80 hover:bg-white hover:shadow-md transition-all hover:border-[#A78BCC]/30 group"
+      className="cursor-pointer border-border bg-card/80 hover:bg-card hover:shadow-md transition-all hover:border-primary/30 group"
       onClick={onClick}
     >
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-medium text-gray-800 truncate group-hover:text-[#A78BCC] transition-colors">
+        <CardTitle className="text-base font-medium text-foreground truncate group-hover:text-primary transition-colors">
           {note.title || "Untitled"}
         </CardTitle>
       </CardHeader>

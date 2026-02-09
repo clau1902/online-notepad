@@ -25,9 +25,9 @@ export function DeleteNoteDialog({
 }: DeleteNoteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md border-[#E8F0E8] bg-[#FAF8F5]">
+      <DialogContent className="sm:max-w-md border-border bg-background">
         <DialogHeader>
-          <DialogTitle className="text-[#CC7070]">Delete Note</DialogTitle>
+          <DialogTitle className="text-destructive">Delete Note</DialogTitle>
           <DialogDescription>
             Are you sure you want to delete &ldquo;{noteTitle || "Untitled"}&rdquo;?
             This action cannot be undone.
@@ -37,7 +37,7 @@ export function DeleteNoteDialog({
           <Button
             variant="outline"
             onClick={onClose}
-            className="border-[#E8F0E8]"
+            className="border-border"
           >
             Cancel
           </Button>
@@ -46,7 +46,7 @@ export function DeleteNoteDialog({
               await onConfirm();
               onClose();
             }}
-            className="bg-[#CC7070] hover:bg-[#BB5F5F] text-white"
+            className="bg-destructive hover:bg-destructive/90 text-white"
           >
             Delete
           </Button>

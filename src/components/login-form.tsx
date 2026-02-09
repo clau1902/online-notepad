@@ -46,11 +46,11 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="border-[#E8F0E8] bg-white/80 backdrop-blur-sm shadow-lg">
+    <Card className="border-border bg-card/80 backdrop-blur-sm shadow-lg">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <SmallFlower className="w-8 h-8" />
-          <CardTitle className="text-2xl text-[#A78BCC]">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl text-primary">Welcome Back</CardTitle>
           <SmallFlower className="w-8 h-8" />
         </div>
         <CardDescription>Sign in to access your notes</CardDescription>
@@ -58,7 +58,7 @@ export function LoginForm() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-md bg-[#CC7070]/10 border border-[#CC7070]/30 p-3 text-sm text-[#CC7070]">
+            <div className="rounded-md bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -71,7 +71,7 @@ export function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="border-[#E8F0E8] focus-visible:ring-[#A78BCC]"
+              className="border-border focus-visible:ring-ring"
             />
           </div>
           <div className="space-y-2">
@@ -83,21 +83,21 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="border-[#E8F0E8] focus-visible:ring-[#A78BCC]"
+              className="border-border focus-visible:ring-ring"
             />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button
             type="submit"
-            className="w-full bg-[#A78BCC] hover:bg-[#9577BD] text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             disabled={loading}
           >
             {loading ? "Signing in..." : "Sign In"}
           </Button>
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-[#A78BCC] hover:underline">
+            <Link href="/register" className="text-primary hover:underline">
               Register
             </Link>
           </p>

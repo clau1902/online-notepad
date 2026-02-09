@@ -47,11 +47,11 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="border-[#E8F0E8] bg-white/80 backdrop-blur-sm shadow-lg">
+    <Card className="border-border bg-card/80 backdrop-blur-sm shadow-lg">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <SmallFlower className="w-8 h-8" />
-          <CardTitle className="text-2xl text-[#A78BCC]">Create Account</CardTitle>
+          <CardTitle className="text-2xl text-primary">Create Account</CardTitle>
           <SmallFlower className="w-8 h-8" />
         </div>
         <CardDescription>Start organizing your thoughts</CardDescription>
@@ -59,7 +59,7 @@ export function RegisterForm() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-md bg-[#CC7070]/10 border border-[#CC7070]/30 p-3 text-sm text-[#CC7070]">
+            <div className="rounded-md bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -72,7 +72,7 @@ export function RegisterForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="border-[#E8F0E8] focus-visible:ring-[#A78BCC]"
+              className="border-border focus-visible:ring-ring"
             />
           </div>
           <div className="space-y-2">
@@ -84,7 +84,7 @@ export function RegisterForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="border-[#E8F0E8] focus-visible:ring-[#A78BCC]"
+              className="border-border focus-visible:ring-ring"
             />
           </div>
           <div className="space-y-2">
@@ -97,21 +97,21 @@ export function RegisterForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className="border-[#E8F0E8] focus-visible:ring-[#A78BCC]"
+              className="border-border focus-visible:ring-ring"
             />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button
             type="submit"
-            className="w-full bg-[#A78BCC] hover:bg-[#9577BD] text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             disabled={loading}
           >
             {loading ? "Creating account..." : "Create Account"}
           </Button>
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-[#A78BCC] hover:underline">
+            <Link href="/login" className="text-primary hover:underline">
               Sign in
             </Link>
           </p>

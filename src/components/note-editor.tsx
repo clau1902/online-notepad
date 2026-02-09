@@ -52,9 +52,9 @@ export function NoteEditor({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-lg border-[#E8F0E8] bg-[#FAF8F5]">
+      <DialogContent className="sm:max-w-lg border-border bg-background">
         <DialogHeader>
-          <DialogTitle className="text-[#A78BCC]">
+          <DialogTitle className="text-primary">
             {note ? "Edit Note" : "New Note"}
           </DialogTitle>
         </DialogHeader>
@@ -66,7 +66,7 @@ export function NoteEditor({
               placeholder="Note title..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="border-[#E8F0E8] focus-visible:ring-[#A78BCC]"
+              className="border-input focus-visible:ring-ring"
             />
           </div>
           <div className="space-y-2">
@@ -77,7 +77,7 @@ export function NoteEditor({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}
-              className="resize-none border-[#E8F0E8] focus-visible:ring-[#A78BCC]"
+              className="resize-none border-input focus-visible:ring-ring"
             />
           </div>
         </div>
@@ -87,7 +87,7 @@ export function NoteEditor({
               <Button
                 variant="ghost"
                 onClick={onDelete}
-                className="text-[#CC7070] hover:text-[#CC7070] hover:bg-[#CC7070]/10"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
               >
                 Delete
               </Button>
@@ -97,14 +97,14 @@ export function NoteEditor({
             <Button
               variant="outline"
               onClick={onClose}
-              className="border-[#E8F0E8]"
+              className="border-border"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-[#A78BCC] hover:bg-[#9577BD] text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {saving ? "Saving..." : "Save"}
             </Button>
