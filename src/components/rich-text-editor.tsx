@@ -78,6 +78,7 @@ export function RichTextEditor({
       Placeholder.configure({ placeholder }),
     ],
     content,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
