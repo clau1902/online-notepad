@@ -11,11 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { useThemeContext } from "@/components/theme-provider";
+import { themes, THEME_IDS } from "@/lib/themes";
 
 export function UserMenu() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { theme, setTheme } = useThemeContext();
 
   const initials = session?.user?.name
     ? session.user.name
@@ -40,8 +43,8 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
-        <Avatar className="h-9 w-9 border-2 border-[#A78BCC]/30 hover:border-[#A78BCC]/60 transition-colors">
-          <AvatarFallback className="bg-[#A78BCC]/10 text-[#A78BCC] text-sm font-medium">
+        <Avatar className="h-9 w-9 border-2 border-primary/30 hover:border-primary/60 transition-colors">
+          <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
             {initials}
           </AvatarFallback>
         </Avatar>
@@ -50,11 +53,33 @@ export function UserMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{session?.user?.name}</p>
-            <p className="text-xs text-muted-foreground">{session?.user?.email}</p>
+            <p className="text-xs text-muted-foreground">
+              {session?.user?.email}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-[#CC7070] focus:text-[#CC7070]">
+        <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+          Theme
+        </DropdownMenuLabel>
+        {THEME_IDS.map((id) => (
+          <DropdownMenuItem
+            key={id}
+            onClick={() => setTheme(id)}
+            className={theme === id ? "bg-accent/50" : ""}
+          >
+            <span
+              className="mr-2 h-3 w-3 rounded-full inline-block shrink-0 border border-black/10"
+              style={{ backgroundColor: themes[id].previewColors.primary }}
+            />
+            {themes[id].name}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          className="text-destructive focus:text-destructive"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Sign out
         </DropdownMenuItem>

@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SmallFlower } from "@/components/flower-decoration";
+import { ThemeDecoration } from "@/components/decorations";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -50,9 +50,9 @@ export function RegisterForm() {
     <Card className="border-border bg-card/80 backdrop-blur-sm shadow-lg">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <SmallFlower className="w-8 h-8" />
+          <ThemeDecoration size="small" className="w-8 h-8" />
           <CardTitle className="text-2xl text-primary">Create Account</CardTitle>
-          <SmallFlower className="w-8 h-8" />
+          <ThemeDecoration size="small" className="w-8 h-8" />
         </div>
         <CardDescription>Start organizing your thoughts</CardDescription>
       </CardHeader>

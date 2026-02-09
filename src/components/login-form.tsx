@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SmallFlower } from "@/components/flower-decoration";
+import { ThemeDecoration } from "@/components/decorations";
 
 export function LoginForm() {
   const router = useRouter();
@@ -49,9 +49,9 @@ export function LoginForm() {
     <Card className="border-border bg-card/80 backdrop-blur-sm shadow-lg">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <SmallFlower className="w-8 h-8" />
+          <ThemeDecoration size="small" className="w-8 h-8" />
           <CardTitle className="text-2xl text-primary">Welcome Back</CardTitle>
-          <SmallFlower className="w-8 h-8" />
+          <ThemeDecoration size="small" className="w-8 h-8" />
         </div>
         <CardDescription>Sign in to access your notes</CardDescription>
       </CardHeader>

@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { NoteCard, type Note } from "@/components/note-card";
 import { NoteEditor } from "@/components/note-editor";
 import { DeleteNoteDialog } from "@/components/delete-note-dialog";
-import { FlowerDecoration } from "@/components/flower-decoration";
+import { ThemeDecoration } from "@/components/decorations";
 import { Plus } from "lucide-react";
 
 export default function NotesPage() {
@@ -75,10 +75,10 @@ export default function NotesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-semibold text-gray-800">My Notes</h2>
+        <h2 className="text-2xl font-semibold text-foreground">My Notes</h2>
         <Button
           onClick={handleCreate}
-          className="bg-[#A78BCC] hover:bg-[#9577BD] text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <Plus className="mr-2 h-4 w-4" />
           New Note
@@ -93,8 +93,8 @@ export default function NotesPage() {
         </div>
       ) : notes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <FlowerDecoration className="w-32 h-32 mb-6 opacity-40" />
-          <h3 className="text-lg font-medium text-gray-600 mb-2">
+          <ThemeDecoration className="w-32 h-32 mb-6 opacity-40" />
+          <h3 className="text-lg font-medium text-muted-foreground mb-2">
             No notes yet
           </h3>
           <p className="text-muted-foreground mb-6">
@@ -102,7 +102,7 @@ export default function NotesPage() {
           </p>
           <Button
             onClick={handleCreate}
-            className="bg-[#A78BCC] hover:bg-[#9577BD] text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <Plus className="mr-2 h-4 w-4" />
             Create Note
