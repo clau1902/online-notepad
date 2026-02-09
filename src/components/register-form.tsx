@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/lib/auth-client";
+import { migrateGuestNotes } from "@/lib/migrate-guest-notes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +37,8 @@ export function RegisterForm() {
         onError: (ctx) => {
           setError(ctx.error.message || "Registration failed");
         },
-        onSuccess: () => {
+        onSuccess: async () => {
+          await migrateGuestNotes();
           router.push("/notes");
           router.refresh();
         },

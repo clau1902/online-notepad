@@ -75,14 +75,17 @@ export function LandingPage() {
           A calming, beautiful space for your thoughts. Choose a theme that fits
           your mood.
         </p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-wrap gap-4 justify-center">
           <Button
             asChild
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
           >
-            <Link href="/register">Get Started</Link>
+            <Link href="/notes">Try it now</Link>
           </Button>
           <Button asChild variant="outline" className="border-border px-8">
+            <Link href="/register">Create Account</Link>
+          </Button>
+          <Button asChild variant="ghost" className="px-8">
             <Link href="/login">Sign In</Link>
           </Button>
         </div>

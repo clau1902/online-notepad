@@ -1,18 +1,10 @@
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth-session";
 import { Header } from "@/components/header";
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
-
-  if (!session) {
-    redirect("/login");
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Header />

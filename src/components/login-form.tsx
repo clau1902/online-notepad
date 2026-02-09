@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "@/lib/auth-client";
+import { migrateGuestNotes } from "@/lib/migrate-guest-notes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +36,8 @@ export function LoginForm() {
         onError: (ctx) => {
           setError(ctx.error.message || "Invalid credentials");
         },
-        onSuccess: () => {
+        onSuccess: async () => {
+          await migrateGuestNotes();
           router.push("/notes");
           router.refresh();
         },
