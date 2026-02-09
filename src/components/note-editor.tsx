@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import type { Note } from "@/components/note-card";
 
 interface NoteEditorProps {
@@ -52,7 +52,7 @@ export function NoteEditor({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-lg border-border bg-background">
+      <DialogContent className="sm:max-w-2xl border-border bg-background max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-primary">
             {note ? "Edit Note" : "New Note"}
@@ -70,15 +70,8 @@ export function NoteEditor({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="note-content">Content</Label>
-            <Textarea
-              id="note-content"
-              placeholder="Write your thoughts..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={10}
-              className="resize-none border-input focus-visible:ring-ring"
-            />
+            <Label>Content</Label>
+            <RichTextEditor content={content} onChange={setContent} />
           </div>
         </div>
         <DialogFooter className="flex gap-2 sm:justify-between">
