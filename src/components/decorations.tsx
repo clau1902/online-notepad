@@ -105,17 +105,37 @@ export function StarDecoration({ className }: { className?: string }) {
       <polygon
         points="100,20 112,75 170,75 122,110 138,165 100,135 62,165 78,110 30,75 88,75"
         style={{ fill: "var(--primary)" }}
-        opacity="0.4"
+        opacity="0.45"
       />
-      {/* Small stars */}
-      <circle cx="40" cy="40" r="3" style={{ fill: "var(--accent)" }} opacity="0.6" />
-      <circle cx="165" cy="35" r="2" style={{ fill: "var(--secondary)" }} opacity="0.5" />
-      <circle cx="155" cy="160" r="3" style={{ fill: "var(--accent)" }} opacity="0.4" />
-      <circle cx="30" cy="150" r="2" style={{ fill: "var(--secondary)" }} opacity="0.5" />
-      <circle cx="75" cy="175" r="2" style={{ fill: "var(--accent)" }} opacity="0.3" />
-      <circle cx="140" cy="20" r="2" style={{ fill: "var(--accent)" }} opacity="0.5" />
-      <circle cx="60" cy="25" r="1.5" style={{ fill: "var(--secondary)" }} opacity="0.4" />
-      <circle cx="180" cy="100" r="2" style={{ fill: "var(--accent)" }} opacity="0.3" />
+      {/* Medium 4-point stars */}
+      <polygon points="40,40 43,35 46,40 43,45" style={{ fill: "var(--accent)" }} opacity="0.7" />
+      <polygon points="165,55 168,50 171,55 168,60" style={{ fill: "var(--primary)" }} opacity="0.5" />
+      <polygon points="25,120 28,115 31,120 28,125" style={{ fill: "var(--accent)" }} opacity="0.55" />
+      <polygon points="170,140 173,135 176,140 173,145" style={{ fill: "var(--primary)" }} opacity="0.45" />
+      {/* Bright dot stars */}
+      <circle cx="55" cy="18" r="2.5" style={{ fill: "var(--accent)" }} opacity="0.7" />
+      <circle cx="160" cy="25" r="2" style={{ fill: "var(--primary)" }} opacity="0.65" />
+      <circle cx="185" cy="75" r="2.5" style={{ fill: "var(--accent)" }} opacity="0.55" />
+      <circle cx="12" cy="85" r="2" style={{ fill: "var(--primary)" }} opacity="0.6" />
+      <circle cx="175" cy="170" r="2" style={{ fill: "var(--accent)" }} opacity="0.5" />
+      <circle cx="55" cy="170" r="2.5" style={{ fill: "var(--primary)" }} opacity="0.55" />
+      <circle cx="130" cy="18" r="1.5" style={{ fill: "var(--accent)" }} opacity="0.65" />
+      <circle cx="20" cy="55" r="1.5" style={{ fill: "var(--primary)" }} opacity="0.5" />
+      {/* Tiny twinkle stars */}
+      <circle cx="80" cy="10" r="1" style={{ fill: "var(--accent)" }} opacity="0.7" />
+      <circle cx="145" cy="42" r="1" style={{ fill: "var(--primary)" }} opacity="0.6" />
+      <circle cx="190" cy="50" r="1" style={{ fill: "var(--accent)" }} opacity="0.5" />
+      <circle cx="8" cy="40" r="1" style={{ fill: "var(--primary)" }} opacity="0.55" />
+      <circle cx="190" cy="120" r="1" style={{ fill: "var(--accent)" }} opacity="0.45" />
+      <circle cx="10" cy="170" r="1" style={{ fill: "var(--primary)" }} opacity="0.5" />
+      <circle cx="90" cy="185" r="1" style={{ fill: "var(--accent)" }} opacity="0.55" />
+      <circle cx="140" cy="185" r="1" style={{ fill: "var(--primary)" }} opacity="0.45" />
+      <circle cx="30" cy="145" r="1" style={{ fill: "var(--accent)" }} opacity="0.6" />
+      <circle cx="180" cy="155" r="1" style={{ fill: "var(--primary)" }} opacity="0.5" />
+      <circle cx="70" cy="5" r="1" style={{ fill: "var(--primary)" }} opacity="0.4" />
+      <circle cx="115" cy="190" r="1" style={{ fill: "var(--accent)" }} opacity="0.5" />
+      <circle cx="5" cy="105" r="1" style={{ fill: "var(--accent)" }} opacity="0.4" />
+      <circle cx="195" cy="95" r="1" style={{ fill: "var(--primary)" }} opacity="0.35" />
     </svg>
   );
 }
@@ -126,10 +146,17 @@ export function SmallStar({ className }: { className?: string }) {
       <polygon
         points="20,5 23,15 33,15 25,21 28,32 20,25 12,32 15,21 7,15 17,15"
         style={{ fill: "var(--primary)" }}
-        opacity="0.5"
+        opacity="0.55"
       />
-      <circle cx="8" cy="8" r="1.5" style={{ fill: "var(--accent)" }} opacity="0.6" />
-      <circle cx="34" cy="6" r="1" style={{ fill: "var(--secondary)" }} opacity="0.5" />
+      {/* 4-point sparkle */}
+      <polygon points="8,8 9,6 10,8 9,10" style={{ fill: "var(--accent)" }} opacity="0.7" />
+      {/* Dot stars */}
+      <circle cx="34" cy="6" r="1.5" style={{ fill: "var(--accent)" }} opacity="0.65" />
+      <circle cx="4" cy="28" r="1" style={{ fill: "var(--primary)" }} opacity="0.55" />
+      <circle cx="36" cy="32" r="1" style={{ fill: "var(--accent)" }} opacity="0.5" />
+      <circle cx="6" cy="16" r="0.8" style={{ fill: "var(--primary)" }} opacity="0.45" />
+      <circle cx="34" cy="20" r="0.8" style={{ fill: "var(--accent)" }} opacity="0.4" />
+      <circle cx="16" cy="38" r="0.8" style={{ fill: "var(--primary)" }} opacity="0.5" />
     </svg>
   );
 }

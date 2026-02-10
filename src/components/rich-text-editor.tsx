@@ -112,7 +112,7 @@ export function RichTextEditor({
     <TooltipProvider delayDuration={300}>
       <div className={cn("rounded-md border border-input focus-within:ring-1 focus-within:ring-ring", className)}>
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-0.5 border-b border-border px-1 py-1">
+        <div className="flex flex-wrap items-center gap-0.5 border-b border-primary/10 bg-primary/[0.03] px-1 py-1 rounded-t-md">
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             isActive={editor.isActive("bold")}
@@ -142,7 +142,7 @@ export function RichTextEditor({
             <Strikethrough className="h-4 w-4" />
           </ToolbarButton>
 
-          <Separator orientation="vertical" className="mx-1 h-5" />
+          <Separator orientation="vertical" className="mx-1 h-5 bg-primary/15" />
 
           <ToolbarButton
             onClick={() =>
@@ -181,7 +181,7 @@ export function RichTextEditor({
             <Minus className="h-4 w-4" />
           </ToolbarButton>
 
-          <Separator orientation="vertical" className="mx-1 h-5" />
+          <Separator orientation="vertical" className="mx-1 h-5 bg-primary/15" />
 
           <ToolbarButton
             onClick={() => editor.chain().focus().undo().run()}
