@@ -5,6 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -31,6 +32,8 @@ interface RichTextEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  editorClassName?: string;
+  className?: string;
 }
 
 function ToolbarButton({
@@ -70,6 +73,8 @@ export function RichTextEditor({
   content,
   onChange,
   placeholder = "Write your thoughts...",
+  editorClassName,
+  className,
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -84,8 +89,12 @@ export function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class:
+        class: [
           "prose prose-sm max-w-none min-h-[200px] px-3 py-2 focus:outline-none text-foreground",
+          editorClassName,
+        ]
+          .filter(Boolean)
+          .join(" "),
       },
     },
   });
@@ -101,7 +110,7 @@ export function RichTextEditor({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="rounded-md border border-input focus-within:ring-1 focus-within:ring-ring">
+      <div className={cn("rounded-md border border-input focus-within:ring-1 focus-within:ring-ring", className)}>
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-0.5 border-b border-border px-1 py-1">
           <ToolbarButton

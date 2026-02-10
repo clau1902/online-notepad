@@ -12,8 +12,6 @@ import { GuestSignupPrompt } from "@/components/guest-signup-prompt";
 import {
   getGuestNotes,
   saveGuestNotes,
-  createGuestNote,
-  updateGuestNote,
   deleteGuestNote,
 } from "@/lib/guest-notes";
 import { Plus } from "lucide-react";
@@ -59,35 +57,6 @@ export default function NotesPage() {
   const handleEdit = (note: Note) => {
     setEditingNote(note);
     setEditorOpen(true);
-  };
-
-  const handleSave = async (data: { title: string; content: string }) => {
-    if (isGuest) {
-      const current = getGuestNotes();
-      if (editingNote) {
-        const updated = updateGuestNote(current, editingNote.id, data);
-        saveGuestNotes(updated);
-      } else {
-        const newNote = createGuestNote(data);
-        saveGuestNotes([newNote, ...current]);
-      }
-      setNotes(getGuestNotes());
-    } else {
-      if (editingNote) {
-        await fetch(`/api/notes/${editingNote.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-      } else {
-        await fetch("/api/notes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-      }
-      await fetchNotes();
-    }
   };
 
   const handleDeleteClick = () => {
@@ -160,7 +129,15 @@ export default function NotesPage() {
         open={editorOpen}
         onClose={() => setEditorOpen(false)}
         note={editingNote}
-        onSave={handleSave}
+        isGuest={isGuest}
+        onNoteCreated={(created) => setEditingNote(created)}
+        onNotesChanged={() => {
+          if (isGuest) {
+            setNotes(getGuestNotes());
+          } else {
+            fetchNotes();
+          }
+        }}
         onDelete={handleDeleteClick}
       />
 

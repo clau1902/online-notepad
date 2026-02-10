@@ -4,105 +4,137 @@ import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RichTextEditor } from "@/components/rich-text-editor";
+import { useAutosave, type SaveStatus } from "@/hooks/use-autosave";
 import type { Note } from "@/components/note-card";
+import { ArrowLeft, Trash2 } from "lucide-react";
 
 interface NoteEditorProps {
   open: boolean;
   onClose: () => void;
   note?: Note | null;
-  onSave: (data: { title: string; content: string }) => Promise<void>;
+  isGuest: boolean;
+  onNoteCreated: (note: Note) => void;
+  onNotesChanged: () => void;
   onDelete?: () => void;
+}
+
+function SaveStatusIndicator({ status }: { status: SaveStatus }) {
+  if (status === "idle") return null;
+
+  return (
+    <span
+      className={`text-sm ${
+        status === "saving"
+          ? "text-muted-foreground"
+          : status === "saved"
+            ? "text-primary"
+            : "text-destructive"
+      }`}
+    >
+      {status === "saving" && "Saving..."}
+      {status === "saved" && "Saved"}
+      {status === "error" && "Error saving"}
+    </span>
+  );
 }
 
 export function NoteEditor({
   open,
   onClose,
   note,
-  onSave,
+  isGuest,
+  onNoteCreated,
+  onNotesChanged,
   onDelete,
 }: NoteEditorProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [currentNoteId, setCurrentNoteId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (note) {
-      setTitle(note.title);
-      setContent(note.content);
-    } else {
-      setTitle("");
-      setContent("");
+    if (open) {
+      if (note) {
+        setTitle(note.title);
+        setContent(note.content);
+        setCurrentNoteId(note.id);
+      } else {
+        setTitle("");
+        setContent("");
+        setCurrentNoteId(null);
+      }
     }
   }, [note, open]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    await onSave({ title, content });
-    setSaving(false);
-    onClose();
-  };
+  const { status } = useAutosave({
+    noteId: currentNoteId,
+    title,
+    content,
+    isGuest,
+    onNoteCreated: (created) => {
+      setCurrentNoteId(created.id);
+      onNoteCreated(created);
+    },
+    onNotesChanged,
+  });
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-2xl border-border bg-background max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-primary">
-            {note ? "Edit Note" : "New Note"}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label htmlFor="note-title">Title</Label>
-            <Input
-              id="note-title"
-              placeholder="Note title..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="border-input focus-visible:ring-ring"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Content</Label>
-            <RichTextEditor content={content} onChange={setContent} />
-          </div>
+      <DialogContent
+        className="!fixed !inset-0 sm:!inset-10 !translate-x-0 !translate-y-0 !top-0 sm:!top-10 !left-0 sm:!left-10 !max-w-none !w-auto !rounded-none sm:!rounded-xl flex flex-col border-border bg-background p-0"
+        showCloseButton={false}
+      >
+        {/* Hidden accessible title */}
+        <DialogTitle className="sr-only">
+          {note ? "Edit Note" : "New Note"}
+        </DialogTitle>
+
+        {/* Header bar */}
+        <div className="flex items-center gap-3 border-b border-border px-4 py-3 shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground -ml-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
+
+          <Input
+            placeholder="Untitled note..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="flex-1 border-0 bg-transparent text-lg font-medium text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-0 shadow-none"
+          />
+
+          <SaveStatusIndicator status={status} />
+
+          {note && onDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onDelete}
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-        <DialogFooter className="flex gap-2 sm:justify-between">
-          <div>
-            {note && onDelete && (
-              <Button
-                variant="ghost"
-                onClick={onDelete}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                Delete
-              </Button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="border-border"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              {saving ? "Saving..." : "Save"}
-            </Button>
-          </div>
-        </DialogFooter>
+
+        {/* Editor area */}
+        <div className="flex-1 overflow-y-auto px-4 py-2">
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
+            editorClassName="min-h-[60vh]"
+            className="border-0 focus-within:ring-0"
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
