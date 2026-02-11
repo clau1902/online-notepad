@@ -22,11 +22,20 @@ export async function POST(request: NextRequest) {
   const created = await db
     .insert(note)
     .values(
-      toMigrate.map((n: { title?: string; content?: string }) => ({
-        userId: session.user.id,
-        title: n.title || "",
-        content: n.content || "",
-      }))
+      toMigrate.map(
+        (n: {
+          title?: string;
+          content?: string;
+          isPinned?: boolean;
+          tags?: string[];
+        }) => ({
+          userId: session.user.id,
+          title: n.title || "",
+          content: n.content || "",
+          isPinned: n.isPinned ?? false,
+          tags: n.tags ?? [],
+        })
+      )
     )
     .returning();
 

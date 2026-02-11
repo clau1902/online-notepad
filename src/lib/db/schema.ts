@@ -61,6 +61,16 @@ export const verification = pgTable("verification", {
 
 // ── App tables ──────────────────────────────────────────────────
 
+export const notebook = pgTable("notebook", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const note = pgTable("note", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id")
@@ -68,6 +78,11 @@ export const note = pgTable("note", {
     .references(() => user.id, { onDelete: "cascade" }),
   title: text("title").notNull().default(""),
   content: text("content").notNull().default(""),
+  isPinned: boolean("is_pinned").notNull().default(false),
+  notebookId: uuid("notebook_id").references(() => notebook.id, {
+    onDelete: "set null",
+  }),
+  tags: text("tags").array().notNull().default([]),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

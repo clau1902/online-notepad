@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { note } from "@/lib/db/schema";
+import { notebook } from "@/lib/db/schema";
 import { getSession } from "@/lib/auth-session";
-import { eq, desc } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export async function GET() {
   const session = await getSession();
@@ -10,13 +10,13 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const notes = await db
+  const notebooks = await db
     .select()
-    .from(note)
-    .where(eq(note.userId, session.user.id))
-    .orderBy(desc(note.isPinned), desc(note.updatedAt));
+    .from(notebook)
+    .where(eq(notebook.userId, session.user.id))
+    .orderBy(asc(notebook.name));
 
-  return NextResponse.json(notes);
+  return NextResponse.json(notebooks);
 }
 
 export async function POST(request: NextRequest) {
@@ -27,17 +27,13 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
-  const [newNote] = await db
-    .insert(note)
+  const [created] = await db
+    .insert(notebook)
     .values({
       userId: session.user.id,
-      title: body.title || "",
-      content: body.content || "",
-      isPinned: body.isPinned ?? false,
-      notebookId: body.notebookId ?? null,
-      tags: body.tags ?? [],
+      name: body.name || "Untitled",
     })
     .returning();
 
-  return NextResponse.json(newNote, { status: 201 });
+  return NextResponse.json(created, { status: 201 });
 }
