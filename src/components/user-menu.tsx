@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut } from "lucide-react";
+import { toast } from "sonner";
 import { useThemeContext } from "@/components/theme-provider";
 import { themes, THEME_IDS } from "@/lib/themes";
 
@@ -42,7 +43,7 @@ export function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="focus:outline-none">
+      <DropdownMenuTrigger className="focus:outline-none" aria-label="User menu">
         <Avatar className="h-9 w-9 border-2 border-primary/30 hover:border-primary/60 transition-colors">
           <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
             {initials}
@@ -65,7 +66,7 @@ export function UserMenu() {
         {THEME_IDS.map((id) => (
           <DropdownMenuItem
             key={id}
-            onClick={() => setTheme(id)}
+            onClick={() => { setTheme(id); toast.success(`Theme changed to ${themes[id].name}`); }}
             className={theme === id ? "bg-accent/50" : ""}
           >
             <span

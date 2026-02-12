@@ -7,6 +7,7 @@ import {
   createGuestNote,
   updateGuestNote,
 } from "@/lib/guest-notes";
+import { toast } from "sonner";
 import type { Note } from "@/components/note-card";
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -138,6 +139,7 @@ export function useAutosave({
         }, SAVED_DISPLAY_MS);
       } catch {
         setStatus("error");
+        toast.error("Failed to save note");
       } finally {
         savingRef.current = false;
       }

@@ -29,6 +29,7 @@ interface NoteEditorProps {
   note?: Note | null;
   isGuest: boolean;
   notebooks: Notebook[];
+  defaultNotebookId?: string | null;
   onNoteCreated: (note: Note) => void;
   onNotesChanged: () => void;
   onDelete?: () => void;
@@ -70,6 +71,7 @@ export function NoteEditor({
   note,
   isGuest,
   notebooks,
+  defaultNotebookId,
   onNoteCreated,
   onNotesChanged,
   onDelete,
@@ -95,7 +97,7 @@ export function NoteEditor({
         setContent("");
         setCurrentNoteId(null);
         setIsPinned(false);
-        setNotebookId(null);
+        setNotebookId(defaultNotebookId ?? null);
         setTags([]);
       }
     }
@@ -180,6 +182,7 @@ export function NoteEditor({
               <Button
                 variant="ghost"
                 size="sm"
+                aria-label={`Notebook: ${currentNotebook?.name || "None"}`}
                 className="text-muted-foreground hover:text-foreground hover:bg-primary/10 gap-1"
               >
                 <BookOpen className="h-4 w-4" />
@@ -213,6 +216,8 @@ export function NoteEditor({
             variant="ghost"
             size="sm"
             onClick={handlePinToggle}
+            aria-label={isPinned ? "Unpin note" : "Pin note"}
+            aria-pressed={isPinned}
             className={`${
               isPinned
                 ? "text-primary bg-primary/10"
@@ -227,6 +232,7 @@ export function NoteEditor({
               variant="ghost"
               size="sm"
               onClick={onDelete}
+              aria-label="Delete note"
               className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="h-4 w-4" />

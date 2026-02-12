@@ -39,11 +39,13 @@ interface RichTextEditorProps {
 function ToolbarButton({
   onClick,
   isActive,
+  disabled,
   tooltip,
   children,
 }: {
   onClick: () => void;
   isActive?: boolean;
+  disabled?: boolean;
   tooltip: string;
   children: React.ReactNode;
 }) {
@@ -55,8 +57,14 @@ function ToolbarButton({
           variant="ghost"
           size="sm"
           onClick={onClick}
+          disabled={disabled}
+          aria-label={tooltip}
           className={`h-8 w-8 p-0 ${
-            isActive ? "bg-primary/15 text-primary" : "text-muted-foreground"
+            disabled
+              ? "text-muted-foreground/30 cursor-not-allowed"
+              : isActive
+                ? "bg-primary/15 text-primary"
+                : "text-muted-foreground"
           }`}
         >
           {children}
@@ -116,28 +124,28 @@ export function RichTextEditor({
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             isActive={editor.isActive("bold")}
-            tooltip="Bold"
+            tooltip="Bold (⌘B)"
           >
             <Bold className="h-4 w-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleItalic().run()}
             isActive={editor.isActive("italic")}
-            tooltip="Italic"
+            tooltip="Italic (⌘I)"
           >
             <Italic className="h-4 w-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleUnderline().run()}
             isActive={editor.isActive("underline")}
-            tooltip="Underline"
+            tooltip="Underline (⌘U)"
           >
             <UnderlineIcon className="h-4 w-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleStrike().run()}
             isActive={editor.isActive("strike")}
-            tooltip="Strikethrough"
+            tooltip="Strikethrough (⌘⇧S)"
           >
             <Strikethrough className="h-4 w-4" />
           </ToolbarButton>
@@ -185,13 +193,15 @@ export function RichTextEditor({
 
           <ToolbarButton
             onClick={() => editor.chain().focus().undo().run()}
-            tooltip="Undo"
+            disabled={!editor.can().undo()}
+            tooltip="Undo (⌘Z)"
           >
             <Undo className="h-4 w-4" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().redo().run()}
-            tooltip="Redo"
+            disabled={!editor.can().redo()}
+            tooltip="Redo (⌘⇧Z)"
           >
             <Redo className="h-4 w-4" />
           </ToolbarButton>

@@ -25,13 +25,14 @@ interface NoteCardProps {
   note: Note;
   onClick: () => void;
   onTagClick?: (tag: string) => void;
+  index?: number;
 }
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "").trim();
 }
 
-export function NoteCard({ note, onClick, onTagClick }: NoteCardProps) {
+export function NoteCard({ note, onClick, onTagClick, index = 0 }: NoteCardProps) {
   const preview = stripHtml(note.content);
 
   return (
@@ -39,7 +40,8 @@ export function NoteCard({ note, onClick, onTagClick }: NoteCardProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Card
-            className="cursor-pointer border-border bg-card/80 hover:bg-card hover:shadow-md transition-all hover:border-primary/30 group animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+            className="cursor-pointer border-border bg-card/80 hover:bg-card hover:shadow-md transition-all hover:border-primary/30 group animate-in fade-in-0 slide-in-from-bottom-2 duration-300 fill-mode-backwards"
+            style={{ animationDelay: `${index * 75}ms` }}
             onClick={onClick}
           >
             <CardHeader className="pb-2">
@@ -65,6 +67,7 @@ export function NoteCard({ note, onClick, onTagClick }: NoteCardProps) {
                         e.stopPropagation();
                         onTagClick?.(tag);
                       }}
+                      aria-label={`Filter by tag: ${tag}`}
                       className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary hover:bg-primary/20 transition-colors"
                     >
                       {tag}

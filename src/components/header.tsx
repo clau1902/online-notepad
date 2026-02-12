@@ -13,7 +13,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <ThemeDecoration size="small" className="h-7 w-7" />
+          <ThemeDecoration size="small" className="h-7 w-7" aria-hidden="true" />
           <h1 className="text-xl font-semibold text-primary">Notepad</h1>
         </Link>
         {!isPending && (

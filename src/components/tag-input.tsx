@@ -41,7 +41,7 @@ export function TagInput({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-6 py-2 border-b border-primary/10 bg-primary/[0.02]">
-      <Tag className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+      <Tag className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" aria-hidden="true" />
       {tags.map((tag) => (
         <span
           key={tag}
@@ -50,6 +50,7 @@ export function TagInput({
           {tag}
           <button
             onClick={() => removeTag(tag)}
+            aria-label={`Remove tag ${tag}`}
             className="hover:text-destructive transition-colors"
           >
             <X className="h-3 w-3" />

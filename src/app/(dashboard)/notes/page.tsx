@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +12,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { NoteCard, type Note } from "@/components/note-card";
 import { NoteEditor } from "@/components/note-editor";
 import { DeleteNoteDialog } from "@/components/delete-note-dialog";
 import { NotebookDialog } from "@/components/notebook-dialog";
 import { NotebookShelf } from "@/components/notebook-shelf";
 import { ThemeDecoration } from "@/components/decorations";
-import { GuestSignupPrompt } from "@/components/guest-signup-prompt";
 import type { Notebook } from "@/lib/types";
+import { toast } from "sonner";
 import {
   getGuestNotes,
   saveGuestNotes,
@@ -38,6 +47,11 @@ import {
   X,
   Pencil,
   Trash2,
+  LogIn,
+  UserPlus,
+  AlertTriangle,
+  RefreshCw,
+  SearchX,
 } from "lucide-react";
 
 type SortBy = "updated" | "created" | "titleAsc" | "titleDesc";
@@ -65,6 +79,7 @@ export default function NotesPage() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingNote, setDeletingNote] = useState<Note | null>(null);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   // Filters & sort
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,18 +94,71 @@ export default function NotesPage() {
   >("create");
   const [editingNotebook, setEditingNotebook] = useState<Notebook | null>(null);
 
+  // Notebook delete confirmation
+  const [deleteNotebookDialogOpen, setDeleteNotebookDialogOpen] = useState(false);
+  const [deletingNotebook, setDeletingNotebook] = useState<Notebook | null>(null);
+  const [deletingNotebookLoading, setDeletingNotebookLoading] = useState(false);
+
+  // Fetch error state
+  const [fetchError, setFetchError] = useState(false);
+
+  // ── Search ref & keyboard shortcuts ──────────────────────────
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in inputs/editors
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      // Cmd/Ctrl+K → focus search (always works)
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+        return;
+      }
+
+      // Escape → clear search if focused
+      if (e.key === "Escape" && document.activeElement === searchRef.current) {
+        setSearchQuery("");
+        searchRef.current?.blur();
+        return;
+      }
+
+      if (isInput || editorOpen || deleteDialogOpen || notebookDialogOpen || authDialogOpen) return;
+
+      // N → new note
+      if (e.key === "n" || e.key === "N") {
+        e.preventDefault();
+        handleCreate();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editorOpen, deleteDialogOpen, notebookDialogOpen, authDialogOpen, isGuest]);
+
   // ── Fetch data ────────────────────────────────────────────────
 
   const fetchNotes = useCallback(async () => {
     if (sessionLoading) return;
 
-    if (!isGuest) {
-      const res = await fetch("/api/notes");
-      if (res.ok) {
-        setNotes(await res.json());
+    try {
+      if (!isGuest) {
+        const res = await fetch("/api/notes");
+        if (res.ok) {
+          setNotes(await res.json());
+        } else {
+          setFetchError(true);
+        }
+      } else {
+        setNotes(getGuestNotes());
       }
-    } else {
-      setNotes(getGuestNotes());
+    } catch {
+      setFetchError(true);
     }
     setLoading(false);
   }, [isGuest, sessionLoading]);
@@ -98,13 +166,17 @@ export default function NotesPage() {
   const fetchNotebooks = useCallback(async () => {
     if (sessionLoading) return;
 
-    if (!isGuest) {
-      const res = await fetch("/api/notebooks");
-      if (res.ok) {
-        setNotebooks(await res.json());
+    try {
+      if (!isGuest) {
+        const res = await fetch("/api/notebooks");
+        if (res.ok) {
+          setNotebooks(await res.json());
+        }
+      } else {
+        setNotebooks(getGuestNotebooks());
       }
-    } else {
-      setNotebooks(getGuestNotebooks());
+    } catch {
+      // Notebook fetch errors are non-critical
     }
   }, [isGuest, sessionLoading]);
 
@@ -168,11 +240,19 @@ export default function NotesPage() {
   // ── CRUD handlers ─────────────────────────────────────────────
 
   const handleCreate = () => {
+    if (isGuest) {
+      setAuthDialogOpen(true);
+      return;
+    }
     setEditingNote(null);
     setEditorOpen(true);
   };
 
   const handleEdit = (note: Note) => {
+    if (isGuest) {
+      setAuthDialogOpen(true);
+      return;
+    }
     setEditingNote(note);
     setEditorOpen(true);
   };
@@ -196,6 +276,7 @@ export default function NotesPage() {
       await fetch(`/api/notes/${deletingNote.id}`, { method: "DELETE" });
       await fetchNotes();
     }
+    toast.success("Note deleted");
     setDeletingNote(null);
   };
 
@@ -252,27 +333,41 @@ export default function NotesPage() {
       }
       await fetchNotebooks();
     }
+    toast.success(notebookDialogMode === "create" ? "Notebook created" : "Notebook renamed");
   };
 
-  const handleDeleteNotebook = async (nb: Notebook) => {
-    if (isGuest) {
-      const current = getGuestNotebooks();
-      saveGuestNotebooks(deleteGuestNotebook(current, nb.id));
-      // Clear notebookId from notes that belonged to this notebook
-      const currentNotes = getGuestNotes();
-      const updated = currentNotes.map((n) =>
-        n.notebookId === nb.id ? { ...n, notebookId: null } : n
-      );
-      saveGuestNotes(updated);
-      setNotebooks(getGuestNotebooks());
-      setNotes(getGuestNotes());
-    } else {
-      await fetch(`/api/notebooks/${nb.id}`, { method: "DELETE" });
-      await fetchNotebooks();
-      await fetchNotes();
-    }
-    if (filterNotebookId === nb.id) {
-      setFilterNotebookId(null);
+  const handleDeleteNotebookClick = (nb: Notebook) => {
+    setDeletingNotebook(nb);
+    setDeleteNotebookDialogOpen(true);
+  };
+
+  const handleDeleteNotebookConfirm = async () => {
+    if (!deletingNotebook) return;
+    setDeletingNotebookLoading(true);
+    try {
+      if (isGuest) {
+        const current = getGuestNotebooks();
+        saveGuestNotebooks(deleteGuestNotebook(current, deletingNotebook.id));
+        const currentNotes = getGuestNotes();
+        const updated = currentNotes.map((n) =>
+          n.notebookId === deletingNotebook.id ? { ...n, notebookId: null } : n
+        );
+        saveGuestNotes(updated);
+        setNotebooks(getGuestNotebooks());
+        setNotes(getGuestNotes());
+      } else {
+        await fetch(`/api/notebooks/${deletingNotebook.id}`, { method: "DELETE" });
+        await fetchNotebooks();
+        await fetchNotes();
+      }
+      if (filterNotebookId === deletingNotebook.id) {
+        setFilterNotebookId(null);
+      }
+      toast.success("Notebook deleted");
+    } finally {
+      setDeletingNotebookLoading(false);
+      setDeleteNotebookDialogOpen(false);
+      setDeletingNotebook(null);
     }
   };
 
@@ -289,7 +384,16 @@ export default function NotesPage() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-serif font-semibold text-foreground">My Notes</h2>
+        <div>
+          <h2 className="text-2xl font-serif font-semibold text-foreground">My Notes</h2>
+          {!loading && !sessionLoading && (
+            <p className="text-sm text-muted-foreground/60 mt-0.5">
+              {searchQuery || filterTag || filterNotebookId
+                ? `${filteredNotes.length} result${filteredNotes.length !== 1 ? "s" : ""}`
+                : `${notes.length} note${notes.length !== 1 ? "s" : ""}`}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Notebook shelf */}
@@ -309,11 +413,25 @@ export default function NotesPage() {
         <div className="relative flex-1 min-w-[180px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
+            ref={searchRef}
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 border-input"
+            className="pl-9 pr-16 border-input"
           />
+          {searchQuery ? (
+            <button
+              onClick={() => { setSearchQuery(""); searchRef.current?.focus(); }}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : (
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center gap-0.5 rounded border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] text-muted-foreground font-mono">
+              ⌘K
+            </kbd>
+          )}
         </div>
 
         {/* Notebook filter */}
@@ -354,16 +472,18 @@ export default function NotesPage() {
                     e.stopPropagation();
                     handleRenameNotebook(nb);
                   }}
-                  className="p-1 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+                  aria-label={`Rename ${nb.name}`}
+                  className="p-1.5 opacity-0 group-hover:opacity-100 focus:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
                 >
                   <Pencil className="h-3 w-3" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteNotebook(nb);
+                    handleDeleteNotebookClick(nb);
                   }}
-                  className="p-1 mr-1 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                  aria-label={`Delete ${nb.name}`}
+                  className="p-1.5 mr-1 opacity-0 group-hover:opacity-100 focus:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>
@@ -413,6 +533,7 @@ export default function NotesPage() {
             {filterTag}
             <button
               onClick={() => setFilterTag(null)}
+              aria-label={`Remove tag filter: ${filterTag}`}
               className="hover:text-destructive"
             >
               <X className="h-3 w-3" />
@@ -431,7 +552,38 @@ export default function NotesPage() {
         <div className="h-3.5 bg-gradient-to-b from-primary/[0.14] via-primary/[0.08] to-primary/[0.03]" />
         <div className="h-px bg-primary/[0.12]" />
 
-        {loading || sessionLoading ? (
+        {fetchError ? (
+          /* Error state */
+          <>
+            <div className="flex flex-col items-center justify-center py-20 text-center px-5">
+              <AlertTriangle className="h-10 w-10 text-destructive/60 mb-4" />
+              <h3 className="text-lg font-serif font-medium text-muted-foreground mb-2">
+                Failed to load notes
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Something went wrong. Please try again.
+              </p>
+              <Button
+                onClick={() => {
+                  setFetchError(false);
+                  setLoading(true);
+                  fetchNotes();
+                  fetchNotebooks();
+                }}
+                variant="outline"
+                className="border-border gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Retry
+              </Button>
+            </div>
+            <div className="mx-2">
+              <div className="h-[3px] bg-gradient-to-b from-primary/[0.14] to-primary/[0.08]" />
+              <div className="h-2 bg-gradient-to-b from-primary/[0.08] to-primary/[0.02]" />
+              <div className="h-1.5 bg-gradient-to-b from-foreground/[0.04] to-transparent" />
+            </div>
+          </>
+        ) : loading || sessionLoading ? (
           /* Loading shelves */
           <>
             {[0, 1].map((ri) => (
@@ -452,17 +604,16 @@ export default function NotesPage() {
         ) : filteredNotes.length === 0 ? (
           /* Empty shelf */
           <>
-            <div className="flex flex-col items-center justify-center py-20 text-center px-5">
-              <ThemeDecoration className="w-32 h-32 mb-6 opacity-40" />
-              <h3 className="text-lg font-serif font-medium text-muted-foreground mb-2">
-                {notes.length === 0 ? "No notes yet" : "No notes match"}
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                {notes.length === 0
-                  ? "Create your first note to get started"
-                  : "Try a different search or filter"}
-              </p>
-              {notes.length === 0 && (
+            {notes.length === 0 ? (
+              /* First-time: no notes at all */
+              <div className="flex flex-col items-center justify-center py-20 text-center px-5">
+                <ThemeDecoration className="w-32 h-32 mb-6 opacity-40" />
+                <h3 className="text-lg font-serif font-medium text-muted-foreground mb-2">
+                  No notes yet
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Create your first note to get started
+                </p>
                 <Button
                   onClick={handleCreate}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -470,8 +621,33 @@ export default function NotesPage() {
                   <Plus className="mr-2 h-4 w-4" />
                   Create Note
                 </Button>
-              )}
-            </div>
+              </div>
+            ) : (
+              /* No results from search/filter */
+              <div className="flex flex-col items-center justify-center py-20 text-center px-5">
+                <SearchX className="h-12 w-12 text-muted-foreground/25 mb-4" />
+                <h3 className="text-lg font-serif font-medium text-muted-foreground mb-2">
+                  No notes found
+                </h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  {searchQuery
+                    ? `No results for "${searchQuery}"`
+                    : "Try a different filter"}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setFilterTag(null);
+                    setFilterNotebookId(null);
+                  }}
+                  className="border-border gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Clear filters
+                </Button>
+              </div>
+            )}
             <div className="mx-2">
               <div className="h-[3px] bg-gradient-to-b from-primary/[0.14] to-primary/[0.08]" />
               <div className="h-2 bg-gradient-to-b from-primary/[0.08] to-primary/[0.02]" />
@@ -484,10 +660,11 @@ export default function NotesPage() {
             {noteRows.map((row, ri) => (
               <div key={ri}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-5 py-4">
-                  {row.map((n) => (
+                  {row.map((n, ci) => (
                     <NoteCard
                       key={n.id}
                       note={n}
+                      index={ri * 3 + ci}
                       onClick={() => handleEdit(n)}
                       onTagClick={(tag) => setFilterTag(tag)}
                     />
@@ -515,6 +692,11 @@ export default function NotesPage() {
         note={editingNote}
         isGuest={isGuest}
         notebooks={notebooks}
+        defaultNotebookId={
+          filterNotebookId && filterNotebookId !== "__uncategorized__"
+            ? filterNotebookId
+            : null
+        }
         onNoteCreated={(created) => setEditingNote(created)}
         onNotesChanged={refreshData}
         onDelete={handleDeleteClick}
@@ -535,9 +717,72 @@ export default function NotesPage() {
         mode={notebookDialogMode}
       />
 
-      {isGuest && !sessionLoading && notes.length > 0 && (
-        <GuestSignupPrompt noteCount={notes.length} />
-      )}
+      {/* Notebook delete confirmation */}
+      <Dialog
+        open={deleteNotebookDialogOpen}
+        onOpenChange={(v) => !v && !deletingNotebookLoading && (setDeleteNotebookDialogOpen(false), setDeletingNotebook(null))}
+      >
+        <DialogContent className="sm:max-w-md border-border bg-background">
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Delete Notebook</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &ldquo;{deletingNotebook?.name || ""}&rdquo;?
+              {(() => {
+                const count = deletingNotebook ? notes.filter((n) => n.notebookId === deletingNotebook.id).length : 0;
+                return count > 0
+                  ? ` ${count} note${count !== 1 ? "s" : ""} in this notebook will become uncategorized.`
+                  : "";
+              })()}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => { setDeleteNotebookDialogOpen(false); setDeletingNotebook(null); }}
+              disabled={deletingNotebookLoading}
+              className="border-border"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteNotebookConfirm}
+              disabled={deletingNotebookLoading}
+              className="bg-destructive hover:bg-destructive/90 text-white"
+            >
+              {deletingNotebookLoading ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Auth required dialog for guests */}
+      <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
+        <DialogContent className="sm:max-w-sm border-border bg-background">
+          <DialogHeader>
+            <DialogTitle className="text-center font-serif text-xl text-foreground">
+              Sign in to save notes
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-center text-sm text-muted-foreground">
+            Create an account or sign in to start writing and organizing your
+            notes.
+          </p>
+          <div className="flex flex-col gap-2 pt-2">
+            <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Link href="/register">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Create Account
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="border-border">
+              <Link href="/login">
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Link>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

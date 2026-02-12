@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,8 +24,10 @@ export function DeleteNoteDialog({
   onConfirm,
   noteTitle,
 }: DeleteNoteDialogProps) {
+  const [deleting, setDeleting] = useState(false);
+
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={open} onOpenChange={(v) => !v && !deleting && onClose()}>
       <DialogContent className="sm:max-w-md border-border bg-background">
         <DialogHeader>
           <DialogTitle className="text-destructive">Delete Note</DialogTitle>
@@ -37,18 +40,25 @@ export function DeleteNoteDialog({
           <Button
             variant="outline"
             onClick={onClose}
+            disabled={deleting}
             className="border-border"
           >
             Cancel
           </Button>
           <Button
             onClick={async () => {
-              await onConfirm();
-              onClose();
+              setDeleting(true);
+              try {
+                await onConfirm();
+                onClose();
+              } finally {
+                setDeleting(false);
+              }
             }}
+            disabled={deleting}
             className="bg-destructive hover:bg-destructive/90 text-white"
           >
-            Delete
+            {deleting ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
       </DialogContent>
