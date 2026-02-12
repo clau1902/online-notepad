@@ -329,3 +329,26 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Print ──────────────────────────────────────────────────── */
+@media print {
+  /* Hide chrome */
+  header,
+  .toaster,
+  [data-sonner-toaster],
+  [role="dialog"] {
+    display: none !important;
+  }
+
+  /* Reset backgrounds for ink saving */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Clean up note cards for print */
+  .animate-in {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}

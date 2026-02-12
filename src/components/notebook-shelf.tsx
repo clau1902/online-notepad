@@ -164,7 +164,7 @@ export function NotebookShelf({
           ref={scrollRef}
           role="region"
           aria-label="Notebook shelf"
-          className="flex items-end gap-[3px] pb-[14px] overflow-x-auto scrollbar-none"
+          className="flex items-end gap-[3px] pb-[14px] overflow-x-auto scrollbar-none snap-x snap-mandatory"
           style={{ scrollbarWidth: "none" }}
         >
           {notebooks.map((nb, i) => {
@@ -179,7 +179,7 @@ export function NotebookShelf({
                 key={nb.id}
                 onClick={() => onSelectNotebook(isActive ? null : nb.id)}
                 className={[
-                  "relative flex-shrink-0 overflow-hidden",
+                  "relative flex-shrink-0 overflow-hidden snap-start",
                   "rounded-l-[5px] rounded-r-[2px]",
                   cover.base,
                   "transition-all duration-200 ease-out",
@@ -241,7 +241,7 @@ export function NotebookShelf({
           {/* Add-notebook placeholder */}
           <button
             onClick={onCreateNotebook}
-            className="flex-shrink-0 w-9 h-[96px] rounded-l-[5px] rounded-r-[2px] border border-dashed border-muted-foreground/15 hover:border-muted-foreground/30 bg-foreground/[0.02] hover:bg-foreground/[0.04] flex items-center justify-center transition-all duration-200"
+            className="flex-shrink-0 w-9 h-[96px] rounded-l-[5px] rounded-r-[2px] border border-dashed border-muted-foreground/15 hover:border-muted-foreground/30 bg-foreground/[0.02] hover:bg-foreground/[0.04] flex items-center justify-center transition-all duration-200 snap-start"
             aria-label="Create new notebook"
             title="Create new notebook"
           >

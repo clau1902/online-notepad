@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/lib/auth-client";
@@ -18,6 +18,20 @@ import {
 } from "@/components/ui/card";
 import { ThemeDecoration } from "@/components/decorations";
 
+function getPasswordStrength(pw: string): { score: number; label: string; color: string } {
+  if (!pw) return { score: 0, label: "", color: "" };
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^a-zA-Z0-9]/.test(pw)) score++;
+
+  if (score <= 1) return { score: 1, label: "Weak", color: "bg-destructive" };
+  if (score <= 3) return { score: 2, label: "Fair", color: "bg-primary/60" };
+  return { score: 3, label: "Strong", color: "bg-accent" };
+}
+
 export function RegisterForm() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -25,6 +39,7 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const strength = useMemo(() => getPasswordStrength(password), [password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +116,26 @@ export function RegisterForm() {
               minLength={8}
               className="border-border focus-visible:ring-ring"
             />
+            {password && (
+              <div className="space-y-1.5">
+                <div className="flex gap-1">
+                  {[1, 2, 3].map((level) => (
+                    <div
+                      key={level}
+                      className={`h-1 flex-1 rounded-full transition-colors ${
+                        level <= strength.score ? strength.color : "bg-muted"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className={`text-xs ${
+                  strength.score === 1 ? "text-destructive" : strength.score === 2 ? "text-muted-foreground" : "text-accent-foreground"
+                }`}>
+                  {strength.label}
+                  {password.length < 8 && " — must be at least 8 characters"}
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">

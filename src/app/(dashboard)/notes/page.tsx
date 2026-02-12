@@ -290,6 +290,47 @@ export default function NotesPage() {
     }
   };
 
+  // ── Context menu handlers ────────────────────────────────────
+
+  const handleTogglePin = async (note: Note) => {
+    const updated = { ...note, isPinned: !note.isPinned };
+    if (isGuest) {
+      const all = getGuestNotes().map((n) => (n.id === note.id ? { ...n, isPinned: updated.isPinned } : n));
+      saveGuestNotes(all);
+      setNotes(all);
+    } else {
+      await fetch(`/api/notes/${note.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPinned: updated.isPinned }),
+      });
+      await fetchNotes();
+    }
+    toast.success(updated.isPinned ? "Note pinned" : "Note unpinned");
+  };
+
+  const handleCardDelete = (note: Note) => {
+    setDeletingNote(note);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleMoveToNotebook = async (note: Note, notebookId: string | null) => {
+    if (isGuest) {
+      const all = getGuestNotes().map((n) => (n.id === note.id ? { ...n, notebookId } : n));
+      saveGuestNotes(all);
+      setNotes(all);
+    } else {
+      await fetch(`/api/notes/${note.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notebookId }),
+      });
+      await fetchNotes();
+    }
+    const nbName = notebookId ? notebooks.find((nb) => nb.id === notebookId)?.name : "No notebook";
+    toast.success(`Moved to ${nbName}`);
+  };
+
   // ── Notebook handlers ─────────────────────────────────────────
 
   const handleCreateNotebook = () => {
@@ -667,6 +708,10 @@ export default function NotesPage() {
                       index={ri * 3 + ci}
                       onClick={() => handleEdit(n)}
                       onTagClick={(tag) => setFilterTag(tag)}
+                      onTogglePin={handleTogglePin}
+                      onDelete={handleCardDelete}
+                      onMoveToNotebook={handleMoveToNotebook}
+                      notebooks={notebooks}
                     />
                   ))}
                 </div>
