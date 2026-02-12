@@ -16,6 +16,7 @@ import { NoteCard, type Note } from "@/components/note-card";
 import { NoteEditor } from "@/components/note-editor";
 import { DeleteNoteDialog } from "@/components/delete-note-dialog";
 import { NotebookDialog } from "@/components/notebook-dialog";
+import { NotebookShelf } from "@/components/notebook-shelf";
 import { ThemeDecoration } from "@/components/decorations";
 import { GuestSignupPrompt } from "@/components/guest-signup-prompt";
 import type { Notebook } from "@/lib/types";
@@ -43,6 +44,14 @@ type SortBy = "updated" | "created" | "titleAsc" | "titleDesc";
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "").trim();
+}
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
 }
 
 export default function NotesPage() {
@@ -153,6 +162,8 @@ export default function NotesPage() {
 
     return result;
   }, [notes, filterNotebookId, filterTag, searchQuery, sortBy]);
+
+  const noteRows = useMemo(() => chunk(filteredNotes, 3), [filteredNotes]);
 
   // ── CRUD handlers ─────────────────────────────────────────────
 
@@ -278,8 +289,19 @@ export default function NotesPage() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-foreground">My Notes</h2>
+        <h2 className="text-2xl font-serif font-semibold text-foreground">My Notes</h2>
       </div>
+
+      {/* Notebook shelf */}
+      {!loading && !sessionLoading && (
+        <NotebookShelf
+          notebooks={notebooks}
+          notes={notes}
+          activeNotebookId={filterNotebookId}
+          onSelectNotebook={setFilterNotebookId}
+          onCreateNotebook={handleCreateNotebook}
+        />
+      )}
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -399,46 +421,93 @@ export default function NotesPage() {
         </div>
       )}
 
-      {/* Notes grid */}
-      {loading || sessionLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-40 rounded-xl" />
-          ))}
-        </div>
-      ) : filteredNotes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <ThemeDecoration className="w-32 h-32 mb-6 opacity-40" />
-          <h3 className="text-lg font-medium text-muted-foreground mb-2">
-            {notes.length === 0 ? "No notes yet" : "No notes match"}
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            {notes.length === 0
-              ? "Create your first note to get started"
-              : "Try a different search or filter"}
-          </p>
-          {notes.length === 0 && (
-            <Button
-              onClick={handleCreate}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Create Note
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredNotes.map((n) => (
-            <NoteCard
-              key={n.id}
-              note={n}
-              onClick={() => handleEdit(n)}
-              onTagClick={(tag) => setFilterTag(tag)}
-            />
-          ))}
-        </div>
-      )}
+      {/* ── Bookcase ────────────────────────────────────────────── */}
+      <div className="relative rounded-lg overflow-hidden">
+        {/* Side panels */}
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-r from-primary/[0.1] to-transparent z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-[3px] bg-gradient-to-l from-primary/[0.1] to-transparent z-10" />
+
+        {/* Top cornice */}
+        <div className="h-3.5 bg-gradient-to-b from-primary/[0.14] via-primary/[0.08] to-primary/[0.03]" />
+        <div className="h-px bg-primary/[0.12]" />
+
+        {loading || sessionLoading ? (
+          /* Loading shelves */
+          <>
+            {[0, 1].map((ri) => (
+              <div key={ri}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-5 py-4">
+                  {[0, 1, 2].map((ci) => (
+                    <Skeleton key={ci} className="h-40 rounded-xl" />
+                  ))}
+                </div>
+                <div className="mx-2">
+                  <div className="h-[3px] bg-gradient-to-b from-primary/[0.14] to-primary/[0.08]" />
+                  <div className="h-2 bg-gradient-to-b from-primary/[0.08] to-primary/[0.02]" />
+                  <div className="h-1.5 bg-gradient-to-b from-foreground/[0.04] to-transparent" />
+                </div>
+              </div>
+            ))}
+          </>
+        ) : filteredNotes.length === 0 ? (
+          /* Empty shelf */
+          <>
+            <div className="flex flex-col items-center justify-center py-20 text-center px-5">
+              <ThemeDecoration className="w-32 h-32 mb-6 opacity-40" />
+              <h3 className="text-lg font-serif font-medium text-muted-foreground mb-2">
+                {notes.length === 0 ? "No notes yet" : "No notes match"}
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                {notes.length === 0
+                  ? "Create your first note to get started"
+                  : "Try a different search or filter"}
+              </p>
+              {notes.length === 0 && (
+                <Button
+                  onClick={handleCreate}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Note
+                </Button>
+              )}
+            </div>
+            <div className="mx-2">
+              <div className="h-[3px] bg-gradient-to-b from-primary/[0.14] to-primary/[0.08]" />
+              <div className="h-2 bg-gradient-to-b from-primary/[0.08] to-primary/[0.02]" />
+              <div className="h-1.5 bg-gradient-to-b from-foreground/[0.04] to-transparent" />
+            </div>
+          </>
+        ) : (
+          /* Note shelves */
+          <>
+            {noteRows.map((row, ri) => (
+              <div key={ri}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-5 py-4">
+                  {row.map((n) => (
+                    <NoteCard
+                      key={n.id}
+                      note={n}
+                      onClick={() => handleEdit(n)}
+                      onTagClick={(tag) => setFilterTag(tag)}
+                    />
+                  ))}
+                </div>
+                {/* Shelf divider */}
+                <div className="mx-2">
+                  <div className="h-[3px] bg-gradient-to-b from-primary/[0.14] to-primary/[0.08]" />
+                  <div className="h-2 bg-gradient-to-b from-primary/[0.08] to-primary/[0.02]" />
+                  <div className="h-1.5 bg-gradient-to-b from-foreground/[0.04] to-transparent" />
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Bottom base */}
+        <div className="h-px bg-primary/[0.1]" />
+        <div className="h-4 bg-gradient-to-t from-primary/[0.1] via-primary/[0.05] to-transparent" />
+      </div>
 
       <NoteEditor
         open={editorOpen}
