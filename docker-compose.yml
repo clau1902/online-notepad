@@ -4,12 +4,14 @@ services:
     restart: unless-stopped
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_USER: notepad
-      POSTGRES_PASSWORD: notepad
-      POSTGRES_DB: notepad
+    env_file: .env
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notepad}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
   pgdata:
